@@ -27,7 +27,7 @@ class GitBookCreater
   def create_file filename, &block
     filepath = File.join @root_dir, filename
     File.open(filepath, "w", &block)
-    STDERR.puts "created #{filepath}"
+    # STDERR.puts "created #{filepath}"
   end
 
   def write
@@ -109,7 +109,7 @@ class TxtReader
     chapters
   end
 
-  def write
+  def with_source
     Dir.mktmpdir do |tmpdir|
       creater = GitBookCreater.new @title, tmpdir
       @chapters.each do |title, lines|
@@ -120,22 +120,43 @@ class TxtReader
           creater.add_part title, lines
         end
       end
-
       creater.write
-      formats = %w/pdf mobi epub/
-
-      children = formats.map do |format|
-        fork do
-          system "time", "gitbook", format, tmpdir, "#{@title}.#{format}"
-        end
-      end
-
-      formats.zip(children) do |(f, pid)|
-        STDERR.puts "generating #{f} in process##{pid}"
-      end
-
-      p Process.waitall
+      yield tmpdir
     end
+  end
+
+  def out_filename_for format
+   "#{@title}.#{format}"
+  end
+
+  def write_epub
+    with_source do |srcdir|
+      system "time", "gitbook", "epub", srcdir, out_filename_for("epub")
+    end
+  end
+
+  def write_mobi
+    with_source do |srcdir|
+      system "time", "gitbook", "epub", srcdir, out_filename_for("mobi")
+    end
+  end
+
+  def write_pdf
+    with_source do |srcdir|
+      system "time", "gitbook", "pdf", srcdir, out_filename_for("pdf")
+    end
+  end
+
+  def write_compressed_mobi
+    write_epub
+    system "time", "kindlegen", out_filename_for('epub'), "-c2", "-o", out_filename_for('kindlegen.mobi')
+  end
+
+  def write_all
+    [ :write_mobi, :write_compressed_mobi ].each do |method|
+      fork { send method }
+    end
+    p Process.waitall
   end
 end
 
@@ -146,7 +167,7 @@ def main
   end
 
   reader = TxtReader.new ARGV[0]
-  reader.write
+  reader.write_all
 end
 
 main

@@ -160,7 +160,10 @@ class TxtReader
 
   def write_all
     [ :write_mobi, :write_epub, :write_pdf ].each do |method|
-      fork { send method }
+      fork do
+        send method
+        exit 0
+      end
     end
   end
 end

@@ -153,13 +153,13 @@ class TxtReader
     end
   end
 
-  def write_compressed_mobi
+  def write_kindlegen_mobi
     write_epub
     system "time", "kindlegen", out_filename_for('epub'), "-c2", "-o", out_filename_for('kindlegen.mobi')
   end
 
   def write_all
-    [ :write_mobi, :write_compressed_mobi, :write_pdf ].each do |method|
+    [ :write_mobi, :write_epub, :write_pdf ].each do |method|
       fork { send method }
     end
     p Process.waitall

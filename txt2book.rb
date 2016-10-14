@@ -122,10 +122,19 @@ class TxtReader
       end
 
       creater.write
+      formats = %w/pdf mobi epub/
 
-      %w/mobi epub/.each do |format|
-        system "time", "gitbook", format, tmpdir, "#{@title}.#{format}"
+      children = formats.map do |format|
+        fork do
+          system "time", "gitbook", format, tmpdir, "#{@title}.#{format}"
+        end
       end
+
+      formats.zip(children) do |(f, pid)|
+        STDERR.puts "generating #{f} in process##{pid}"
+      end
+
+      p Process.waitall
     end
   end
 end

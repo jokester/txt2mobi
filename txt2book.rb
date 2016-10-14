@@ -110,6 +110,7 @@ class TxtReader
   end
 
   def with_source
+    exception = nil
     Dir.mktmpdir do |tmpdir|
       creater = GitBookCreater.new @title, tmpdir
       @chapters.each do |title, lines|
@@ -121,8 +122,13 @@ class TxtReader
         end
       end
       creater.write
-      yield tmpdir
+      begin
+        yield tmpdir
+      rescue => e
+        exception = e
+      end
     end
+    throw exception if exception
   end
 
   def out_filename_for format

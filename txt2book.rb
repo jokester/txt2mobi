@@ -38,7 +38,7 @@ class GitBookCreater
 
   def write_metadata
     create_file "book.json" do |f|
-      f.write ({ title: @title }).to_json
+      f.write ({ title: @title, language: "zh" }).to_json
     end
   end
 

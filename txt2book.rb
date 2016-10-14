@@ -162,7 +162,6 @@ class TxtReader
     [ :write_mobi, :write_epub, :write_pdf ].each do |method|
       fork { send method }
     end
-    p Process.waitall
   end
 end
 
@@ -172,8 +171,11 @@ def main
     exit 1
   end
 
-  reader = TxtReader.new ARGV[0]
-  reader.write_all
+  ARGV.each do |filename|
+    reader = TxtReader.new filename
+    reader.write_all
+  end
+  p Process.waitall
 end
 
 main

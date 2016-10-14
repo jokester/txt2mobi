@@ -55,7 +55,7 @@ class GitBookCreater
   def md_lines title, lines
     md_lines = []
     if title
-      md_lines << "##{title}"
+      md_lines << "# #{title}"
     end
     md_lines + lines
   end
@@ -123,8 +123,8 @@ class TxtReader
 
       creater.write
 
-      %w/pdf epub mobi/.each do |format|
-        system "gitbook", format, tmpdir, "#{@title}.#{format}"
+      %w/mobi epub/.each do |format|
+        system "time", "gitbook", format, tmpdir, "#{@title}.#{format}"
       end
     end
   end

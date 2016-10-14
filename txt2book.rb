@@ -70,7 +70,7 @@ class GitBookCreater
 end
 
 class TxtReader
-  CHAPTER_HEADER = %r{第[一二三四五六七八九十百千万]+.*[章节部]}
+  CHAPTER_HEADER = %r{^(.*?)(第[一二三四五六七八九十百千万]+.*[章节部])(.*)$}
   def initialize filename
     @title = File.basename filename,(File.extname filename)
     lines = read_lines filename
@@ -91,8 +91,8 @@ class TxtReader
     current_lines = []
 
     lines.each_with_index do |line, line_no|
-      case line
-      when CHAPTER_HEADER
+      is_title = (CHAPTER_HEADER =~ line) && [ $1.length < 5, $2.length < 12 ].all?
+      if is_title
         if current_chapter.length > 0
           chapters[current_chapter] = current_lines
           current_lines = []

@@ -143,7 +143,7 @@ class TxtReader
 
   def write_mobi
     with_source do |srcdir|
-      system "time", "gitbook", "epub", srcdir, out_filename_for("mobi")
+      system "time", "gitbook", "mobi", srcdir, out_filename_for("mobi")
     end
   end
 
@@ -159,7 +159,7 @@ class TxtReader
   end
 
   def write_all
-    [ :write_mobi, :write_compressed_mobi ].each do |method|
+    [ :write_mobi, :write_compressed_mobi, :write_pdf ].each do |method|
       fork { send method }
     end
     p Process.waitall
